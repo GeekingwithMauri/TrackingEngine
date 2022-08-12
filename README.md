@@ -12,6 +12,25 @@ Contracts expire, SDKs get deprecated and fees rises. These, just to mention a f
 
 This is rather hard when our codebases are littered with direct SDKs implementations. _TrackingEngine_ makes such processes painless by making their consumption behind a facade. This why, whatever happens under the hood shall not concern our Tracking clients apps.
 
+## Instalation 
+### Xcode 13
+ 1. From the **File** menu, **Add Packages…**.
+ 2. Enter package repository URL: `https://github.com/GeekingwithMauri/TrackingEngine`
+ 3. Confirm the version and let Xcode resolve the package
+
+### Swift Package Manager
+
+If you want to use _TrackingEngine_ in any other project that uses [SwiftPM](https://swift.org/package-manager/), add the package as a dependency in `Package.swift`:
+
+```swift
+dependencies: [
+  .package(
+    url: "https://github.com/GeekingwithMauri/TrackingEngine",
+    from: "0.1.0"
+  ),
+]
+```
+
 ## Example of usage
 
 ```swift
