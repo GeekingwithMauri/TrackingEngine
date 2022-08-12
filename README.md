@@ -11,7 +11,7 @@ Contracts expire, SDKs get deprecated and fees rises. These, just to mention a f
 
 This is rather hard when our codebases are littered with direct SDKs implementations. _TrackingEngine_ makes such processes painless by making their consumption behind a facade. This why, whatever happens under the hood shall not concern our Tracking clients apps.
 
-## Instalation 
+## Installation 
 ### Xcode 13
  1. From the **File** menu, **Add Packages…**.
  2. Enter package repository URL: `https://github.com/GeekingwithMauri/TrackingEngine`
@@ -50,7 +50,7 @@ TrackingEngineFacade.log(eventName: "view_appeared", parameters: ["type": "home"
 ## Good practices recommendations
 > “All problems in computer science can be solved by another level of indirection." - David Wheeler
 
-And the end of the day, this is also a 3rd party dependency so it's recommemded to limit its own spreading.
+And the end of the day, this is also a 3rd party dependency so it's recommended to limit its own spreading.
 
 In order to prevent the spread of `import TrackingEngine` and direct `TrackingEngineFacade.log` all over the place, it's highly advisable to centralize its usage within a thin wrapper as follows 👇🏽
 
@@ -73,3 +73,7 @@ struct Tracker: TrackingLoggable {
 ``` 
 
 The above makes the library self contained. It also opens the door for testing, by simply replacing the real implementation with a `TrackingLoggable` with a [Spy](https://martinfowler.com/articles/mocksArentStubs.html#TheDifferenceBetweenMocksAndStubs).
+
+## Current limitations
+- For the time being, this only supports Firebase. 
+- `GoogleService-Info` must be included in the main project
