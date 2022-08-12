@@ -1,5 +1,4 @@
 # TrackingEngine
-Tracking wrapper to preserve our codebase dependency-free from 3rd-party vendors.
 
 ## Rationale
 
