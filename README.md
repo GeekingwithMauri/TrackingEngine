@@ -9,7 +9,7 @@ _TrackingEngine_ centralizes the tracking SDKs and exposes them via facades.
 ## What's the point?
 Contracts expire, SDKs get deprecated and fees rises. These, just to mention a few, are valid reasons to change tracking vendors. 
 
-This is rather hard when our codebases are littered with direct SDKs implementations. _TrackingEngine_ makes such processes painless by making their consumption behind a facade. This why, whatever happens under the hood shall not concern our Tracking clients apps.
+This is rather hard when our codebases are littered with direct SDKs implementations. _TrackingEngine_ makes such processes painless by making their consumption behind a facade. This is why, whatever happens under the hood shall not concern our Tracking clients apps.
 
 ## Installation 
 ### Xcode 13
@@ -71,8 +71,11 @@ struct Tracker: TrackingLoggable {
     }
 }
 ``` 
+## Testing 
 
-The above makes the library self contained. It also opens the door for testing, by simply replacing the real implementation with a `TrackingLoggable` with a [Spy](https://martinfowler.com/articles/mocksArentStubs.html#TheDifferenceBetweenMocksAndStubs).
+The above recommendation makes the library self contained. It also opens the door for testing, by simply replacing the real implementation with a `TrackingLoggable` with a [Spy](https://github.com/GeekingwithMauri/TrackingEngine/blob/main/Tests/TrackingEngineTests/TrackingLoggableSpy.swift).
+
+Check out [the example](https://github.com/GeekingwithMauri/TrackingEngine/blob/main/Tests/TrackingEngineTests/TrackingEngineTests.swift) of how said testing could occur.
 
 ## Current limitations
 - For the time being, this only supports Firebase. 
