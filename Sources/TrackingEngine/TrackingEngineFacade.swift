@@ -20,4 +20,11 @@ public struct TrackingEngineFacade {
         Self.logger?.track(eventName: eventName, parameters: parameters)
         print("event: \(eventName) - parameters: \(parameters ?? [:])")
     }
+
+    /// Tracks errors alongside its context on the cloud provider. For the time being, that is **Firebase**
+    /// - Parameters:
+    ///   - errorName: error name to be tracked.
+    ///   - parameters: The dictionary of metadata context. 
+    public static func log(errorName: String, parameters: [String: Any]) {
+    }
 }
