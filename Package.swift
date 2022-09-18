@@ -24,7 +24,8 @@ let package = Package(
         .target(
             name: "TrackingEngine",
             dependencies: [
-                .product(name: "FirebaseAnalytics", package: "Firebase")
+                .product(name: "FirebaseAnalytics", package: "Firebase"),
+                .product(name: "FirebaseCrashlytics", package: "Firebase")
             ]),
         .testTarget(
             name: "TrackingEngineTests",
