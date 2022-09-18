@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseAnalytics
+import FirebaseCrashlytics
 
 protocol TrackingLoggable {
     /// Tracks user's events on the cloud provider. For the time being, that is **Firebase**
@@ -24,7 +25,7 @@ protocol TrackingLoggable {
 
 struct TrackingLog: TrackingLoggable {
     func log(errorName: String, parameters: [String : Any]) {
-        
+        Crashlytics.crashlytics().log("\(errorName): \(parameters)")
     }
 
     func track(eventName: String, parameters: [String : Any]?) {

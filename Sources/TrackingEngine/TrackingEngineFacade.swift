@@ -26,5 +26,7 @@ public struct TrackingEngineFacade {
     ///   - errorName: error name to be tracked.
     ///   - parameters: The dictionary of metadata context. 
     public static func log(errorName: String, parameters: [String: Any]) {
+        Self.logger?.log(errorName: errorName, parameters: parameters)
+        print("event: \(errorName) - parameters: \(parameters)")
     }
 }
