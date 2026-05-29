@@ -1,5 +1,5 @@
 import XCTest
-@testable import TrackingEngine
+@testable import TrackingEngineCore
 
 final class TrackingEngineTests: XCTestCase {
     func test_trackingEngineFacadeIsLoggingProperly() throws {

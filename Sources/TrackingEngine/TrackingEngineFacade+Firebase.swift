@@ -7,6 +7,6 @@ extension TrackingEngineFacade {
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
-        Self.logger = TrackingLog()
+        configure(with: TrackingLog())
     }
 }

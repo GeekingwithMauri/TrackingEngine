@@ -1,4 +1,4 @@
-@testable import TrackingEngine
+import TrackingEngineCore
 
 final class TrackingLoggableSpy: TrackingLoggable {
     var invokedTrack = false
