@@ -3,6 +3,10 @@ import FirebaseRemoteConfig
 import TrackingEngineCore
 
 extension RemoteConfigFacade {
+    /// Firebase's own minimum fetch interval, 12 hours. Public so a host passing
+    /// a DEBUG override doesn't have to restate the release value alongside it.
+    public static let defaultFetchInterval: TimeInterval = 12 * 60 * 60
+
     /// Wires Remote Config and starts a fetch. Call alongside
     /// `TrackingEngineFacade.setup()`; order between the two doesn't matter,
     /// both configure the Firebase app if nobody has yet.
@@ -11,7 +15,7 @@ extension RemoteConfigFacade {
     ///   - defaults: every flag key mapped to its baked-in value. Seeding these
     ///     is what makes an un-fetched read return the app's own default rather
     ///     than Remote Config's blanket `false`.
-    ///   - minimumFetchInterval: Firebase's own default is 12 hours, which is
+    ///   - minimumFetchInterval: defaults to `defaultFetchInterval`, which is
     ///     right for release and useless while developing — a console toggle
     ///     appears to do nothing for half a day. Pass `0` from DEBUG builds.
     ///     It lives here as an argument rather than a `#if DEBUG` because
@@ -19,7 +23,7 @@ extension RemoteConfigFacade {
     ///     defined in a package target, and the failure is silent either way.
     public static func setup(
         defaults: [String: Bool],
-        minimumFetchInterval: TimeInterval = 43_200
+        minimumFetchInterval: TimeInterval = defaultFetchInterval
     ) {
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
