@@ -22,6 +22,9 @@ let package = Package(
         )
     ],
     targets: [
+        // ponytail: every target pinned to Swift 5 semantics. tools-version 6.0 is here
+        // for `.iOS(.v18)`, not for a concurrency migration — `TrackingEngineFacade.logger`
+        // is a mutable static, which Swift 6 rejects outright. Drop these to adopt Swift 6.
         .target(
             name: "TrackingEngineCore",
             dependencies: [],
