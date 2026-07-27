@@ -41,6 +41,10 @@ let package = Package(
                 .product(
                     name: "FirebaseCrashlytics",
                     package: "Firebase"
+                ),
+                .product(
+                    name: "FirebaseRemoteConfig",
+                    package: "Firebase"
                 )
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
