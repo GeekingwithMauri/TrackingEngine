@@ -62,4 +62,58 @@ final class RemoteConfigFacadeTests: XCTestCase {
             default: true
         ))
     }
+
+    func test_resolutionWithNoProviderWired_isUnavailableRatherThanAValue() {
+        // Given
+        RemoteConfigFacade.provider = nil
+
+        // Verify — the caller must be sent to its own default, which is exactly
+        // where it landed before `resolution` existed
+        XCTAssertEqual(
+            RemoteConfigFacade.resolution("ff_anything"),
+            .unavailable
+        )
+    }
+
+    func test_resolutionReachesTheProviderVerbatim() {
+        // Given
+        let resolverSpy = FlagResolvingSpy()
+        resolverSpy.stubbedResolutions = ["ff_brandingRevampEnabled": .remote(true)]
+        let sut = RemoteConfigFacade.self
+        sut.configure(with: resolverSpy)
+
+        // Verify
+        XCTAssertEqual(
+            sut.resolution("ff_brandingRevampEnabled"),
+            .remote(true)
+        )
+        XCTAssertEqual(
+            resolverSpy.invokedResolutionKey,
+            "ff_brandingRevampEnabled"
+        )
+    }
+
+    func test_aResolverThatCannotTellDefaultsApart_reportsUnavailable() {
+        // Given — a conformer written before `resolution` existed, taking the
+        // protocol's default implementation
+        let sut = LegacyResolver()
+
+        // Verify — silence, never a fabricated value. This is what makes the
+        // addition safe for other consumers of the package.
+        XCTAssertEqual(
+            sut.resolution("ff_anything"),
+            .unavailable
+        )
+    }
+}
+
+/// Stands in for a `FlagResolving` conformer in another consumer that predates
+/// `resolution(_:)` and therefore never implemented it.
+private struct LegacyResolver: FlagResolving {
+    func isEnabled(
+        _ key: String,
+        default defaultValue: Bool
+    ) -> Bool {
+        defaultValue
+    }
 }
