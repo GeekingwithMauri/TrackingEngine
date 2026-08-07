@@ -23,4 +23,11 @@ public struct RemoteConfigFacade {
             default: defaultValue
         ) ?? defaultValue
     }
+
+    /// - Returns: what the wired provider has for this key, or `.unavailable`
+    ///   when no provider is wired — the permanent state of a test host that
+    ///   links only this product.
+    public static func resolution(_ key: String) -> RemoteFlagResolution {
+        provider?.resolution(key) ?? .unavailable
+    }
 }
