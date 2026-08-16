@@ -29,4 +29,14 @@ struct TrackingLog: TrackingLoggable {
             forKey: key
         )
     }
+
+    func setUserProperty(
+        _ value: String?,
+        forName name: String
+    ) {
+        Analytics.setUserProperty(
+            value,
+            forName: name
+        )
+    }
 }

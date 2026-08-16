@@ -38,4 +38,16 @@ public struct TrackingEngineFacade {
             forKey: key
         )
     }
+
+    /// Passthrough to the logger's user-scoped analytics properties. A no-op while
+    /// `logger` is `nil`, exactly like `log`.
+    public static func setUserProperty(
+        _ value: String?,
+        forName name: String
+    ) {
+        logger?.setUserProperty(
+            value,
+            forName: name
+        )
+    }
 }
