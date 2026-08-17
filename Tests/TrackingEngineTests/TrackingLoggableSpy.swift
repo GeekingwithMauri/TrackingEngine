@@ -43,4 +43,38 @@ final class TrackingLoggableSpy: TrackingLoggable {
         invokedSetCustomValueCount += 1
         invokedSetCustomValueParameters = (value, key)
     }
+
+    var invokedSetUserID = false
+    var invokedSetUserIDCount = 0
+    var invokedSetUserIDParameter: String??
+
+    func setUserID(_ id: String?) {
+        invokedSetUserID = true
+        invokedSetUserIDCount += 1
+        invokedSetUserIDParameter = id
+    }
+}
+
+/// A conformer that implements **only** the two required members. Its existence is the
+/// proof that every later addition to `TrackingLoggable` carries a working default: this
+/// file stops compiling the moment one of them becomes a requirement, which is a louder
+/// failure than a comment promising the same thing.
+final class BareTrackingLoggable: TrackingLoggable {
+    /// Flipped by either required member, so a default implementation that quietly routed
+    /// itself into `track` or `log` would be caught rather than assumed absent.
+    var recordedSomething = false
+
+    func track(
+        eventName: String,
+        parameters: [String: Any]?
+    ) {
+        recordedSomething = true
+    }
+
+    func log(
+        errorName: String,
+        parameters: [String: Any]
+    ) {
+        recordedSomething = true
+    }
 }

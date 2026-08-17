@@ -100,4 +100,68 @@ final class TrackingEngineTests: XCTestCase {
             1
         )
     }
+
+    func test_trackingEngineFacadeForwardsTheUserIdentityToTheLogger() throws {
+        // Given
+        let trackerSpy = TrackingLoggableSpy()
+        let sut = TrackingEngineFacade.self
+        sut.logger = trackerSpy
+
+        // When
+        sut.setUserID("57C8D2E4-0000-4B1A-9E3F-000000000001")
+
+        // Verify — verbatim and exactly once: an id the facade edits, truncates or
+        // re-sends is an id that no longer matches the one the caller can be asked for
+        XCTAssertEqual(
+            try XCTUnwrap(trackerSpy.invokedSetUserIDParameter),
+            "57C8D2E4-0000-4B1A-9E3F-000000000001"
+        )
+        XCTAssertEqual(
+            trackerSpy.invokedSetUserIDCount,
+            1
+        )
+    }
+
+    func test_trackingEngineFacadeForwardsAClearedUserIdentity() throws {
+        // Given
+        let trackerSpy = TrackingLoggableSpy()
+        let sut = TrackingEngineFacade.self
+        sut.logger = trackerSpy
+
+        // When
+        sut.setUserID(nil)
+
+        // Verify — the negative control. `nil` is how a conformer forgets a user, so it
+        // has to travel rather than be swallowed as "nothing to do"
+        XCTAssertEqual(
+            trackerSpy.invokedSetUserIDCount,
+            1
+        )
+        XCTAssertNil(
+            try XCTUnwrap(trackerSpy.invokedSetUserIDParameter)
+        )
+    }
+
+    func test_aBareConformerCompilesAndItsDefaultsAreInert() {
+        // Given a conformer that implements only the two required members
+        let sut = BareTrackingLoggable()
+
+        // When — every optional member is reachable through the default extension
+        sut.setUserID("ignored")
+        sut.setUserProperty(
+            "ignored",
+            forName: "ignored"
+        )
+        sut.setCustomValue(
+            "ignored",
+            forKey: "ignored"
+        )
+
+        // Verify — the compile is half the pin; the other half is that no default
+        // quietly routes itself into a required member behind the conformer's back
+        XCTAssertFalse(
+            sut.recordedSomething,
+            "A no-op default reached `track` or `log`"
+        )
+    }
 }

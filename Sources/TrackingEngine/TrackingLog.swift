@@ -39,4 +39,12 @@ struct TrackingLog: TrackingLoggable {
             forName: name
         )
     }
+
+    /// Both sinks, from one call, deliberately: analytics answers "how many people", crash
+    /// reporting answers "how many people hit this crash", and the second question is only
+    /// answerable if it is keyed on the same id as the first.
+    func setUserID(_ id: String?) {
+        Analytics.setUserID(id)
+        Crashlytics.crashlytics().setUserID(id)
+    }
 }

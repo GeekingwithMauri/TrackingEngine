@@ -50,4 +50,11 @@ public struct TrackingEngineFacade {
             forName: name
         )
     }
+
+    /// Passthrough to the logger's user identity, which it fans out to every sink it has.
+    /// A no-op while `logger` is `nil`, exactly like `log` — and worth knowing that a call
+    /// made before `configure(with:)` is silently dropped rather than queued.
+    public static func setUserID(_ id: String?) {
+        logger?.setUserID(id)
+    }
 }
