@@ -77,6 +77,10 @@ The above recommendation makes the library self contained. It also opens the doo
 
 Check out [the example](https://github.com/GeekingwithMauri/TrackingEngine/blob/main/Tests/TrackingEngineTests/TrackingEngineTests.swift) of how said testing could occur.
 
+## Amplitude as a second analytics sink
+
+`TrackingEngineFacade.setup(amplitudeAPIKey:)` adds Amplitude beside Firebase Analytics. Every `log(eventName:)`, `setUserProperty` and `setUserID` then reaches both; `log(errorName:)` and `setCustomValue` stay Crashlytics-only. `nil` or an empty key keeps the Firebase-only behaviour, so existing callers change nothing. `forcingAnalyticsCollection: false` opts Amplitude out for that launch, since Amplitude has no `Info.plist` switch of its own.
+
 ## Current limitations
-- For the time being, this only supports Firebase. 
+- Firebase is always configured; Amplitude is opt-in per key.
 - `GoogleService-Info` must be included in the main project
