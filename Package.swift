@@ -19,7 +19,11 @@ let package = Package(
             name: "Firebase",
             url: "https://github.com/firebase/firebase-ios-sdk.git",
             .upToNextMajor(from: "12.0.0")
-        )
+        ),
+        .package(
+            url: "https://github.com/amplitude/Amplitude-Swift",
+            .upToNextMajor(from: "1.19.2")
+        ),
     ],
     targets: [
         // ponytail: every target pinned to Swift 5 semantics. tools-version 6.0 is here
@@ -45,7 +49,11 @@ let package = Package(
                 .product(
                     name: "FirebaseRemoteConfig",
                     package: "Firebase"
-                )
+                ),
+                .product(
+                    name: "AmplitudeSwift",
+                    package: "Amplitude-Swift"
+                ),
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
