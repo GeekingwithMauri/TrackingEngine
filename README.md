@@ -81,6 +81,12 @@ Check out [the example](https://github.com/GeekingwithMauri/TrackingEngine/blob/
 
 `TrackingEngineFacade.setup(amplitudeAPIKey:)` adds Amplitude beside Firebase Analytics. Every `log(eventName:)`, `setUserProperty` and `setUserID` then reaches both; `log(errorName:)` and `setCustomValue` stay Crashlytics-only. `nil` or an empty key keeps the Firebase-only behaviour, so existing callers change nothing. `forcingAnalyticsCollection: false` opts Amplitude out for that launch, since Amplitude has no `Info.plist` switch of its own.
 
+## Feature flags: Firebase Remote Config or Amplitude Experiment
+
+`RemoteConfigFacade.setup(defaults:traits:minimumFetchInterval:)` wires Firebase Remote Config. Pass `amplitudeDeploymentKey:` (a project's API key doubles as its default deployment key) and the same seam reads Amplitude Experiment instead — flags and experiment variants alike — while Remote Config is never configured. Call it after `TrackingEngineFacade.setup(amplitudeAPIKey:)`: the Experiment client takes its identity from, and sends exposures through, that analytics instance.
+
+What a read answers on Amplitude: an assigned variant is `.remote(true)` unless its value is `off` or `control`; the default `off` variant (flag inactive, or the install outside every segment) is `.remote(false)`; an empty variant (nothing fetched, or no such key) is `.unavailable`, so the caller's default applies. `defaults` and `minimumFetchInterval` are inert on this path — the SDK fetches every launch and persists the last answer. `traits` become Experiment user properties.
+
 ## Current limitations
 - Firebase is always configured; Amplitude is opt-in per key.
 - `GoogleService-Info` must be included in the main project
