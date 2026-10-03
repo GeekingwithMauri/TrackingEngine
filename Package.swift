@@ -24,6 +24,10 @@ let package = Package(
             url: "https://github.com/amplitude/Amplitude-Swift",
             .upToNextMajor(from: "1.19.2")
         ),
+        .package(
+            url: "https://github.com/amplitude/experiment-ios-client",
+            .upToNextMajor(from: "1.20.3")
+        ),
     ],
     targets: [
         // ponytail: every target pinned to Swift 5 semantics. tools-version 6.0 is here
@@ -53,6 +57,10 @@ let package = Package(
                 .product(
                     name: "AmplitudeSwift",
                     package: "Amplitude-Swift"
+                ),
+                .product(
+                    name: "Experiment",
+                    package: "experiment-ios-client"
                 ),
             ],
             swiftSettings: [.swiftLanguageMode(.v5)]

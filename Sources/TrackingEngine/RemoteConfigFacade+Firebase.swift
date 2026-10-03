@@ -1,3 +1,4 @@
+import Experiment
 import Firebase
 import FirebaseRemoteConfig
 import TrackingEngineCore
@@ -40,11 +41,28 @@ extension RemoteConfigFacade {
     ///     It lives here as an argument rather than a `#if DEBUG` because
     ///     `DEBUG` is reliably defined in the app target and merely usually
     ///     defined in a package target, and the failure is silent either way.
+    ///   - amplitudeDeploymentKey: a key moves flags **and** experiments to Amplitude
+    ///     Experiment, and Firebase Remote Config is then never configured: one provider, not
+    ///     two consulted in turn. `nil` or empty keeps Firebase, as every existing caller has.
+    ///     A project's API key doubles as its default deployment key. Call this **after**
+    ///     `TrackingEngineFacade.setup(amplitudeAPIKey:)`: the Experiment client reads its
+    ///     device/user identity from the Amplitude analytics instance and sends exposures
+    ///     through it. `defaults` and `minimumFetchInterval` do not apply — an un-fetched
+    ///     flag resolves `.unavailable`, and the SDK fetches on every launch.
     public static func setup(
         defaults: [String: Bool],
         traits: [String: String] = [:],
-        minimumFetchInterval: TimeInterval = defaultFetchInterval
+        minimumFetchInterval: TimeInterval = defaultFetchInterval,
+        amplitudeDeploymentKey: String? = nil
     ) {
+        if let amplitudeDeploymentKey, !amplitudeDeploymentKey.isEmpty {
+            setupAmplitude(
+                deploymentKey: amplitudeDeploymentKey,
+                traits: traits
+            )
+
+            return
+        }
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
@@ -117,6 +135,37 @@ extension RemoteConfigFacade {
             }
 
             fetch()
+        }
+    }
+
+    /// Traits travel as Experiment **user properties**, so a console segment can match
+    /// them; they ride the fetch itself, which keeps the ordering guarantee of
+    /// `publish(traits:setting:thenFetching:)` for free.
+    private static func setupAmplitude(
+        deploymentKey: String,
+        traits: [String: String]
+    ) {
+        let client = Experiment.initializeWithAmplitudeAnalytics(
+            apiKey: deploymentKey,
+            config: ExperimentConfigBuilder().build()
+        )
+        // Before the fetch, as with Firebase: the SDK persists the last fetch, so a second
+        // launch answers from it immediately and the first from `.unavailable`.
+        configure(with: AmplitudeFlagResolver(client: client))
+
+        let user = ExperimentUserBuilder()
+            .userProperties(traits)
+            .build()
+        client.fetch(
+            user: user,
+            options: nil
+        ) { _, error in
+            if let error {
+                TrackingEngineFacade.log(
+                    errorName: "remoteConfigFetchFailed",
+                    parameters: ["description": error.localizedDescription]
+                )
+            }
         }
     }
 
