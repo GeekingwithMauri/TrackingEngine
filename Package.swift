@@ -16,7 +16,6 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            name: "Firebase",
             url: "https://github.com/firebase/firebase-ios-sdk.git",
             .upToNextMajor(from: "12.0.0")
         ),
@@ -44,15 +43,15 @@ let package = Package(
                 "TrackingEngineCore",
                 .product(
                     name: "FirebaseAnalytics",
-                    package: "Firebase"
+                    package: "firebase-ios-sdk"
                 ),
                 .product(
                     name: "FirebaseCrashlytics",
-                    package: "Firebase"
+                    package: "firebase-ios-sdk"
                 ),
                 .product(
                     name: "FirebaseRemoteConfig",
-                    package: "Firebase"
+                    package: "firebase-ios-sdk"
                 ),
                 .product(
                     name: "AmplitudeSwift",
