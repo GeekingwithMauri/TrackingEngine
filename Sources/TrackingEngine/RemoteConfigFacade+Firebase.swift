@@ -49,16 +49,23 @@ extension RemoteConfigFacade {
     ///     device/user identity from the Amplitude analytics instance and sends exposures
     ///     through it. `defaults` and `minimumFetchInterval` do not apply — an un-fetched
     ///     flag resolves `.unavailable`, and the SDK fetches on every launch.
+    ///   - onFetched: called once, only after a fetch **succeeds**, when the fresh values are
+    ///     readable through `resolution(_:)` and `isEnabled` — for either provider. Never called
+    ///     on error (the failure is logged instead). It fires on whatever queue the provider SDK
+    ///     completes on, which is not guaranteed to be the main queue; the library does not hop,
+    ///     so a caller that touches UI state hops itself. `nil` (the default) changes nothing.
     public static func setup(
         defaults: [String: Bool],
         traits: [String: String] = [:],
         minimumFetchInterval: TimeInterval = defaultFetchInterval,
-        amplitudeDeploymentKey: String? = nil
+        amplitudeDeploymentKey: String? = nil,
+        onFetched: (@Sendable () -> Void)? = nil
     ) {
         if let amplitudeDeploymentKey, !amplitudeDeploymentKey.isEmpty {
             setupAmplitude(
                 deploymentKey: amplitudeDeploymentKey,
-                traits: traits
+                traits: traits,
+                onFetched: onFetched
             )
 
             return
@@ -85,7 +92,10 @@ extension RemoteConfigFacade {
             setting: { traits in
                 try await remoteConfig.setCustomSignals(traits.mapValues { .string($0) })
             },
-            thenFetching: { fetchAndActivate(remoteConfig) }
+            thenFetching: { fetchAndActivate(
+                remoteConfig,
+                onFetched: onFetched
+            ) }
         )
     }
 
@@ -143,7 +153,8 @@ extension RemoteConfigFacade {
     /// `publish(traits:setting:thenFetching:)` for free.
     private static func setupAmplitude(
         deploymentKey: String,
-        traits: [String: String]
+        traits: [String: String],
+        onFetched: (@Sendable () -> Void)?
     ) {
         let client = Experiment.initializeWithAmplitudeAnalytics(
             apiKey: deploymentKey,
@@ -160,23 +171,39 @@ extension RemoteConfigFacade {
             user: user,
             options: nil
         ) { _, error in
-            if let error {
-                TrackingEngineFacade.log(
-                    errorName: "remoteConfigFetchFailed",
-                    parameters: ["description": error.localizedDescription]
-                )
-            }
+            completeFetch(
+                error: error,
+                onFetched: onFetched
+            )
         }
     }
 
-    private static func fetchAndActivate(_ remoteConfig: RemoteConfig) {
+    private static func fetchAndActivate(
+        _ remoteConfig: RemoteConfig,
+        onFetched: (@Sendable () -> Void)?
+    ) {
         remoteConfig.fetchAndActivate { _, error in
-            if let error {
-                TrackingEngineFacade.log(
-                    errorName: "remoteConfigFetchFailed",
-                    parameters: ["description": error.localizedDescription]
-                )
-            }
+            completeFetch(
+                error: error,
+                onFetched: onFetched
+            )
         }
+    }
+
+    /// What both providers' fetch completions do, lifted so it is testable without a
+    /// network: an error is logged and `onFetched` stays silent; success calls it once.
+    static func completeFetch(
+        error: Error?,
+        onFetched: (@Sendable () -> Void)?
+    ) {
+        if let error {
+            TrackingEngineFacade.log(
+                errorName: "remoteConfigFetchFailed",
+                parameters: ["description": error.localizedDescription]
+            )
+
+            return
+        }
+        onFetched?()
     }
 }
