@@ -1,3 +1,4 @@
+import Foundation
 import TrackingEngineCore
 
 final class FlagResolvingSpy: FlagResolving {
@@ -30,5 +31,15 @@ final class FlagResolvingSpy: FlagResolving {
         invokedResolutionKey = key
 
         return stubbedResolutions[key] ?? .unavailable
+    }
+
+    var stubbedPayloads = [String: Data]()
+
+    var invokedPayloadKey: String?
+
+    func payload(_ key: String) -> Data? {
+        invokedPayloadKey = key
+
+        return stubbedPayloads[key]
     }
 }

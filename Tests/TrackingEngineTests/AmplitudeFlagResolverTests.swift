@@ -54,6 +54,72 @@ final class AmplitudeFlagResolverTests: XCTestCase {
         )
     }
 
+    func test_anAssignedVariantHandsItsPayloadOverAsJSON() throws {
+        // Given
+        let served = Variant(
+            "on",
+            payload: ["limit": 3, "rates": [0, 2, 5]]
+        )
+
+        // When
+        let data = try XCTUnwrap(AmplitudeFlagResolver.jsonPayload(of: served))
+
+        // Verify
+        let decoded = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? NSDictionary)
+        XCTAssertEqual(
+            decoded,
+            ["limit": 3, "rates": [0, 2, 5]]
+        )
+    }
+
+    func test_aBaselineVariantNeverHandsItsPayloadOver() {
+        // Given — an experiment's control arm carrying a payload
+        let served = Variant(
+            "control",
+            payload: ["limit": 3]
+        )
+
+        // Verify
+        XCTAssertNil(AmplitudeFlagResolver.jsonPayload(of: served))
+    }
+
+    func test_theDefaultVariantHasNoPayload() {
+        // Given
+        let served = Variant(
+            nil,
+            payload: ["limit": 3],
+            expKey: nil,
+            key: "off",
+            metadata: ["default": true]
+        )
+
+        // Verify
+        XCTAssertNil(AmplitudeFlagResolver.jsonPayload(of: served))
+    }
+
+    func test_anAssignedVariantWithNoPayload_hasNone() {
+        XCTAssertNil(AmplitudeFlagResolver.jsonPayload(of: Variant("on")))
+    }
+
+    func test_payloadAsksTheClientForTheKey() {
+        // Given
+        let client = ExperimentClientStub(variants: ["ff_tuned": Variant(
+            "on",
+            payload: 7
+        )])
+        let sut = AmplitudeFlagResolver(client: client)
+
+        // Verify
+        XCTAssertEqual(
+            sut.payload("ff_tuned"),
+            Data("7".utf8)
+        )
+        XCTAssertEqual(
+            client.askedKeys,
+            ["ff_tuned"]
+        )
+    }
+
     func test_isEnabledFallsBackOnlyWhenThereIsNoAnswer() {
         // Given
         let client = ExperimentClientStub(variants: [

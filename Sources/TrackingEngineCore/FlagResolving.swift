@@ -1,3 +1,5 @@
+import Foundation
+
 /// What the flag service actually had for a key — as opposed to what the caller
 /// decided to do about it.
 ///
@@ -33,9 +35,21 @@ public protocol FlagResolving {
     /// does — which is the case for experiment assignment, and almost nothing
     /// else.
     func resolution(_ key: String) -> RemoteFlagResolution
+
+    /// The payload the service attached to this key's answer, as JSON data, so
+    /// a flag can carry tunable values and not only switch. `nil` when the flag
+    /// reads off, nothing was fetched, or the answer carries no payload. The
+    /// caller decodes it and keeps its own defaults for `nil`.
+    func payload(_ key: String) -> Data?
 }
 
 extension FlagResolving {
+    /// Default for resolvers with no payload concept: `nil` sends the caller to
+    /// its own defaults.
+    public func payload(_ key: String) -> Data? {
+        nil
+    }
+
     /// Default for resolvers that cannot tell a real remote value from a
     /// fallback. `.unavailable` is the fail-safe answer: it sends the caller to
     /// its own default, which is exactly where it would have landed before this

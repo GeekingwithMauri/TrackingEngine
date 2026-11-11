@@ -1,3 +1,5 @@
+import Foundation
+
 /// Firebase-free entry point for feature flags, mirroring `TrackingEngineFacade`.
 ///
 /// `provider` stays `nil` until `setup(defaults:)` (in the `TrackingEngine`
@@ -29,5 +31,11 @@ public struct RemoteConfigFacade {
     ///   links only this product.
     public static func resolution(_ key: String) -> RemoteFlagResolution {
         provider?.resolution(key) ?? .unavailable
+    }
+
+    /// - Returns: the wired provider's payload for this key as JSON data, or
+    ///   `nil` when no provider is wired or it has none.
+    public static func payload(_ key: String) -> Data? {
+        provider?.payload(key)
     }
 }
