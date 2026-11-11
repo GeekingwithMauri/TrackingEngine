@@ -105,15 +105,57 @@ final class RemoteConfigFacadeTests: XCTestCase {
             .unavailable
         )
     }
+
+    func test_payloadWithNoProviderWired_isNil() {
+        // Given
+        RemoteConfigFacade.provider = nil
+
+        // Verify
+        XCTAssertNil(RemoteConfigFacade.payload("ff_anything"))
+    }
+
+    func test_payloadReachesTheProviderVerbatim() {
+        // Given
+        let resolverSpy = FlagResolvingSpy()
+        resolverSpy.stubbedPayloads = ["ff_tuned": Data(#"{"limit":3}"#.utf8)]
+        let sut = RemoteConfigFacade.self
+        sut.configure(with: resolverSpy)
+
+        // Verify
+        XCTAssertEqual(
+            sut.payload("ff_tuned"),
+            Data(#"{"limit":3}"#.utf8)
+        )
+        XCTAssertEqual(
+            resolverSpy.invokedPayloadKey,
+            "ff_tuned"
+        )
+    }
+
+    func test_aResolverWithoutPayloads_reportsNil_andNeverRoutesThroughItsRequiredMembers() {
+        // Given — a conformer written before `payload` existed
+        let sut = LegacyResolver()
+
+        // When
+        let payload = sut.payload("ff_anything")
+
+        // Verify — nil sends the caller to its own defaults, and the default does not
+        // quietly answer by calling `isEnabled`
+        XCTAssertNil(payload)
+        XCTAssertFalse(sut.calledRequired)
+    }
 }
 
 /// Stands in for a `FlagResolving` conformer in another consumer that predates
-/// `resolution(_:)` and therefore never implemented it.
-private struct LegacyResolver: FlagResolving {
+/// `resolution(_:)` and `payload(_:)` and therefore implements neither.
+private final class LegacyResolver: FlagResolving {
+    private(set) var calledRequired = false
+
     func isEnabled(
         _ key: String,
         default defaultValue: Bool
     ) -> Bool {
-        defaultValue
+        calledRequired = true
+        return defaultValue
     }
 }

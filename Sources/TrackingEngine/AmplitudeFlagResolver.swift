@@ -1,4 +1,5 @@
 import Experiment
+import Foundation
 import TrackingEngineCore
 
 /// Reads flags and experiment variants from Amplitude Experiment, through the
@@ -54,5 +55,25 @@ struct AmplitudeFlagResolver: FlagResolving {
         }
 
         return .remote(!offValues.contains(value))
+    }
+
+    func payload(_ key: String) -> Data? {
+        Self.jsonPayload(of: client.variant(key))
+    }
+
+    /// The variant's payload as JSON data, only when the variant reads on: an
+    /// off or baseline answer never hands its payload to the caller.
+    static func jsonPayload(of variant: Variant) -> Data? {
+        guard resolution(of: variant) == .remote(true), let payload = variant.payload,
+            JSONSerialization.isValidJSONObject([payload])
+        else { return nil }
+        do {
+            return try JSONSerialization.data(
+                withJSONObject: payload,
+                options: .fragmentsAllowed
+            )
+        } catch {
+            return nil
+        }
     }
 }
